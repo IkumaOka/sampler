@@ -1,3 +1,4 @@
+# 参考サイトURL：https://github.com/amber-kshz/PRML/blob/master/notebooks/Ch11_HMC.ipynb
 import numpy as np
 import random 
 from matplotlib import pyplot as plt
@@ -36,3 +37,20 @@ def integrate_eqm(q_initial, p_iintial, grad_U, epsilon, L, method="leapfrog"):
         p_trajectory[i] = p
 
     return q_trajectory, p_trajectory
+
+# U(q) = \frac{1}{2} q^2の簡単な式を考える
+def grad_U(q):
+    return q
+
+q_initial = np.array([0.0])
+p_initial = np.array([1.0])
+
+q_exact = np.cos(np.linspace(0, 2*np.pi, 101))
+p_exact = np.sin(np.linspace(0, 2*np.pi, 101))
+
+def solve_and_plot_trajectory(ax, q_initial, p_initial, q_exact, p_exact, grad_U, epsilon, L, method):
+    q_trajectory, p_trajectory = integrate_eqm(q_initial, p_initial, grad_U, epsilon, L, method=method)
+    ax.plot(q_trajectory[:, 0], p_trajectory[:, 0], 'o-')
+    ax.plot(q_exact, p_exact, '--', color='k')
+    ax.axis("equal")
+    ax.set_title(f"{method} : stepsize = {epsilon}")
