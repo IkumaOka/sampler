@@ -17,7 +17,7 @@ def integrate_eqm(q_initial, p_iintial, grad_U, epsilon, L, method="leapfrog"):
     q = q_initial
     p = p_initial
 
-    for i i range(1, L+1):
+    for i in range(1, L+1):
         # euler: オイラー法
         if method == "euler":
             p_tmp = p.copy()
@@ -54,3 +54,28 @@ def solve_and_plot_trajectory(ax, q_initial, p_initial, q_exact, p_exact, grad_U
     ax.plot(q_exact, p_exact, '--', color='k')
     ax.axis("equal")
     ax.set_title(f"{method} : stepsize = {epsilon}")
+    plt.savefig("hmc_result/hmc_sampling.png")
+
+fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+
+L = 20
+for ax, epsilon, method in zip(
+    axes.flatten(),
+    [0.3, 0.3, 0.3, 1.2, 1.2, 1.2],
+    ["euler", "modified_euler", "leapfrog", "euler", "modified_euler", "leapfrog"]
+):
+    solve_and_plot_trajectory(ax, q_initial, p_initial, q_exact, p_exact, grad_U, epsilon, L, method)
+
+def solve_and_plot_energy(ax, q_initial, p_initial, grad_U, epsilon, L, method):
+    q_trajectory, p_trajectory = integrate_eqm(q_initial, p_initial, grad_U, epsilon, L, method=method)
+    ax.plot(np.linspace(0, epsilon * L, L + 1), 0.5 * ((q_trajectory**2).sum(axis=1) +  (p_trajectory**2).sum(axis=1)), 'o-', label=f"epsilon={epsilon}")
+    E0 = 0.5 * ((q_initial**2).sum() +  (p_initial**2).sum())
+    ax.plot([0, epsilon * L], [E0, E0], '--', color='k')
+
+fig = plt.figure(figsize=(10, 6))
+ax = fig.add_subplot(111)
+for epsilon, L in zip([0.2, 0.4, 0.8], [40, 20, 10]):
+    solve_and_plot_energy(ax, q_initial, p_initial, grad_U, epsilon, L, method="leapfrog")
+
+ax.legend()
+plt.savefig("hmc_result/hmc_energy.png")
